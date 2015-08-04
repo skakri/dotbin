@@ -1,0 +1,23 @@
+#!/bin/sh
+
+readonly CURRENT_BRANCH="`git rev-parse --abbrev-ref HEAD`"
+
+manage_branch_db() {
+  git config --bool "branch.${CURRENT_BRANCH}.database" $1
+}
+
+
+case "$1" in
+'true' )
+  CURRENT_STATUS="`manage_branch_db`"
+  manage_branch_db 'true'
+  [ "$CURRENT_STATUS" != 'true' ] && rake db:create
+  ;;
+
+'false' )
+  [ "`manage_branch_db`" = 'true' ] && rake db:drop
+  manage_branch_db 'false'
+  ;;
+* )
+  manage_branch_db
+esac
